@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
 
-namespace GraphQL.Common.Response {
+namespace GraphQL.Common.Response
+{
 
 	/// <summary>
 	/// A Subscription Response
 	/// </summary>
 	[Obsolete("EXPERIMENTAL")]
-	public class GraphQLSubscriptionResponse : IEquatable<GraphQLSubscriptionResponse> {
+	public class GraphQLSubscriptionResponse : IEquatable<GraphQLSubscriptionResponse>
+	{
 
 		/// <summary>
 		/// The Identifier of the Response
@@ -28,27 +30,39 @@ namespace GraphQL.Common.Response {
 		public override bool Equals(object obj) => this.Equals(obj as GraphQLSubscriptionResponse);
 
 		/// <inheritdoc />
-		public bool Equals(GraphQLSubscriptionResponse other) {
-			if (other == null) {
+		public bool Equals(GraphQLSubscriptionResponse other)
+		{
+			if (other == null)
+			{
 				return false;
 			}
-			if (ReferenceEquals(this, other)) {
+
+			if (ReferenceEquals(this, other))
+			{
 				return true;
 			}
-			if (!Equals(this.Id, other.Id)) {
+
+			if (!Equals(this.Id, other.Id))
+			{
 				return false;
 			}
-			if (!Equals(this.Type, other.Type)) {
+
+			if (!Equals(this.Type, other.Type))
+			{
 				return false;
 			}
-			if (!Equals(this.Payload, other.Payload)) {
+
+			if (!Equals(this.Payload, other.Payload))
+			{
 				return false;
 			}
+
 			return true;
 		}
 
 		/// <inheritdoc />
-		public override int GetHashCode() {
+		public override int GetHashCode()
+		{
 			var hashCode = 9958074;
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(this.Id);
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(this.Type);

@@ -8,6 +8,7 @@ using GraphQL.Common.Response;
 using Newtonsoft.Json;
 
 namespace GraphQL.Client.Http {
+	using System.Net;
 
 	/// <summary>
 	/// Represents the result of a subscription query
@@ -30,20 +31,31 @@ namespace GraphQL.Client.Http {
 			this.clientWebSocket.Options.AddSubProtocol("graphql-ws");
 		}
 
+		/// <summary>
+		/// The Options	to be used
+		/// </summary>
+		public ClientWebSocketOptions Options => this.clientWebSocket.Options;
+
 		public async void StartAsync(CancellationToken cancellationToken = default) {
 			await this.clientWebSocket.ConnectAsync(this.webSocketUri, cancellationToken).ConfigureAwait(false);
-			if (this.clientWebSocket.State == WebSocketState.Open) {
-				var arraySegment = new ArraySegment<byte>(this.buffer);
-				await this.SendInitialMessageAsync(cancellationToken).ConfigureAwait(false);
-				while (this.clientWebSocket.State == WebSocketState.Open) {
-					var webSocketReceiveResult = await this.clientWebSocket.ReceiveAsync(arraySegment, cancellationToken);
-					var stringResult = Encoding.UTF8.GetString(arraySegment.Array, 0, webSocketReceiveResult.Count);
-					var webSocketResponse = JsonConvert.DeserializeObject<GraphQLSubscriptionResponse>(stringResult);
-					if (webSocketResponse != null) {
-						this.LastResponse = webSocketResponse.Payload;
-						this.OnReceive?.Invoke(webSocketResponse.Payload);
-					}
+			if (this.clientWebSocket.State != WebSocketState.Open)
+			{
+				return;
+			}
+
+			var arraySegment = new ArraySegment<byte>(this.buffer);
+			await this.SendInitialMessageAsync(cancellationToken).ConfigureAwait(false);
+			while (this.clientWebSocket.State == WebSocketState.Open) {
+				var webSocketReceiveResult = await this.clientWebSocket.ReceiveAsync(arraySegment, cancellationToken);
+				var stringResult = Encoding.UTF8.GetString(arraySegment.Array, 0, webSocketReceiveResult.Count);
+				var webSocketResponse = JsonConvert.DeserializeObject<GraphQLSubscriptionResponse>(stringResult);
+				if (webSocketResponse == null)
+				{
+					continue;
 				}
+
+				this.LastResponse = webSocketResponse.Payload;
+				this.OnReceive?.Invoke(webSocketResponse.Payload);
 			}
 		}
 

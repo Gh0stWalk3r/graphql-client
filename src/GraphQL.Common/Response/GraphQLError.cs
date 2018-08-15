@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace GraphQL.Common.Response {
+namespace GraphQL.Common.Response
+{
 
 	/// <summary>
 	/// Represents the error of a <see cref="GraphQLResponse"/>
 	/// </summary>
-	public class GraphQLError : IEquatable<GraphQLError> {
+	public class GraphQLError : IEquatable<GraphQLError>
+	{
 
 		/// <summary>
 		/// The error message
@@ -30,27 +32,39 @@ namespace GraphQL.Common.Response {
 		public override bool Equals(object obj) => this.Equals(obj as GraphQLError);
 
 		/// <inheritdoc />
-		public bool Equals(GraphQLError other) {
-			if (other == null) {
+		public bool Equals(GraphQLError other)
+		{
+			if (other == null)
+			{
 				return false;
 			}
-			if (ReferenceEquals(this, other)) {
+
+			if (ReferenceEquals(this, other))
+			{
 				return true;
 			}
-			if (!Equals(this.Message, other.Message)) {
+
+			if (!Equals(this.Message, other.Message))
+			{
 				return false;
 			}
-			if (!Equals(this.Locations, other.Locations)) {
+
+			if (!Equals(this.Locations, other.Locations))
+			{
 				return false;
 			}
-			if (!Equals(this.AdditonalEntries, other.AdditonalEntries)) {
+
+			if (!Equals(this.AdditonalEntries, other.AdditonalEntries))
+			{
 				return false;
 			}
+
 			return true;
 		}
 
 		/// <inheritdoc />
-		public override int GetHashCode() {
+		public override int GetHashCode()
+		{
 			var hashCode = 1587536218;
 			hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(this.Message);
 			hashCode = hashCode * -1521134295 + EqualityComparer<GraphQLLocation[]>.Default.GetHashCode(this.Locations);

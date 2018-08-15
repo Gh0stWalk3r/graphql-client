@@ -8,6 +8,7 @@ using GraphQL.Common.Request;
 using GraphQL.Common.Response;
 
 namespace GraphQL.Client.Http {
+	using System.Linq;
 
 	/// <summary>
 	/// A Client to access GraphQL EndPoints
@@ -45,20 +46,23 @@ namespace GraphQL.Client.Http {
 		/// Initializes a new instance
 		/// </summary>
 		/// <param name="endPoint">The EndPoint to be used</param>
-		public GraphQLHttpClient(string endPoint) : this(new Uri(endPoint)) { }
+		public GraphQLHttpClient(string endPoint)
+			: this(new Uri(endPoint)) { }
 
 		/// <summary>
 		/// Initializes a new instance
 		/// </summary>
 		/// <param name="endPoint">The EndPoint to be used</param>
-		public GraphQLHttpClient(Uri endPoint) : this(new GraphQLHttpClientOptions { EndPoint = endPoint }) { }
+		public GraphQLHttpClient(Uri endPoint)
+			: this(new GraphQLHttpClientOptions { EndPoint = endPoint }) { }
 
 		/// <summary>
 		/// Initializes a new instance
 		/// </summary>
 		/// <param name="endPoint">The EndPoint to be used</param>
 		/// <param name="options">The Options to be used</param>
-		public GraphQLHttpClient(string endPoint, GraphQLHttpClientOptions options) : this(new Uri(endPoint), options) { }
+		public GraphQLHttpClient(string endPoint, GraphQLHttpClientOptions options)
+			: this(new Uri(endPoint), options) { }
 
 		/// <summary>
 		/// Initializes a new instance
@@ -121,18 +125,26 @@ namespace GraphQL.Client.Http {
 			if (request == null) { throw new ArgumentNullException(nameof(request)); }
 			if (request.Query == null) { throw new ArgumentNullException(nameof(request.Query)); }
 
-			var webSocketUri = new Uri($"ws://{this.EndPoint.Host}:{this.EndPoint.Port}{this.EndPoint.AbsolutePath}");
-			var graphQLSubscriptionResult = new GraphQLHttpSubscriptionResult(webSocketUri, request);
-			graphQLSubscriptionResult.StartAsync(cancellationToken);
-			return await Task.FromResult(graphQLSubscriptionResult).ConfigureAwait(false);
+			var isSsl = this.EndPoint.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase);
+			var scheme = isSsl ? "wss" : "ws";
+			var webSocketUri = new Uri($"{scheme}://{this.EndPoint.Host}:{this.EndPoint.Port}{this.EndPoint.AbsolutePath}");
+			var graphQlSubscriptionResult = new GraphQLHttpSubscriptionResult(webSocketUri, request);
+			foreach (var defaultRequestHeader in this.DefaultRequestHeaders)
+			{
+				var key = defaultRequestHeader.Key;
+				var value = defaultRequestHeader.Value.FirstOrDefault();
+				graphQlSubscriptionResult.Options.SetRequestHeader(key, value);
+			}
+
+			//graphQLSubscriptionResult.Options.SetRequestHeader("Authorization", this.DefaultRequestHeaders.Authorization.ToString());
+			graphQlSubscriptionResult.StartAsync(cancellationToken);
+			return await Task.FromResult(graphQlSubscriptionResult).ConfigureAwait(false);
 		}
 
 		/// <summary>
 		/// Releases unmanaged resources
 		/// </summary>
-		public void Dispose() =>
-			this.graphQLHttpHandler.Dispose();
-
+		public void Dispose() => this.graphQLHttpHandler.Dispose();
 	}
 
 }

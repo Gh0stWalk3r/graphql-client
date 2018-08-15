@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 
-namespace GraphQL.Common.Response {
+namespace GraphQL.Common.Response
+{
 
 	/// <summary>
 	/// Represents the location where the <see cref="GraphQLError"/> has been found
 	/// </summary>
-	public class GraphQLLocation : IEquatable<GraphQLLocation> {
+	public class GraphQLLocation : IEquatable<GraphQLLocation>
+	{
 
 		/// <summary>
 		/// The Column
@@ -22,24 +24,34 @@ namespace GraphQL.Common.Response {
 		public override bool Equals(object obj) => this.Equals(obj as GraphQLLocation);
 
 		/// <inheritdoc />
-		public bool Equals(GraphQLLocation other) {
-			if (other == null) {
+		public bool Equals(GraphQLLocation other)
+		{
+			if (other == null)
+			{
 				return false;
 			}
-			if (ReferenceEquals(this, other)) {
+
+			if (ReferenceEquals(this, other))
+			{
 				return true;
 			}
-			if (!Equals(this.Column, other.Column)) {
+
+			if (!Equals(this.Column, other.Column))
+			{
 				return false;
 			}
-			if (!Equals(this.Line, other.Line)) {
+
+			if (!Equals(this.Line, other.Line))
+			{
 				return false;
 			}
+
 			return true;
 		}
 
 		/// <inheritdoc />
-		public override int GetHashCode() {
+		public override int GetHashCode()
+		{
 			var hashCode = 412437926;
 			hashCode = hashCode * -1521134295 + this.Column.GetHashCode();
 			hashCode = hashCode * -1521134295 + this.Line.GetHashCode();
