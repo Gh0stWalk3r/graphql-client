@@ -1,20 +1,22 @@
+using GraphQL.Common.Request;
+using GraphQL.Common.Response;
+
+using Newtonsoft.Json;
+
 using System;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using GraphQL.Common.Request;
-using GraphQL.Common.Response;
-using Newtonsoft.Json;
 
-namespace GraphQL.Client.Http {
-	using System.Net;
-
+namespace GraphQL.Client.Http
+{
 	/// <summary>
 	/// Represents the result of a subscription query
 	/// </summary>
 	[Obsolete("EXPERIMENTAL API")]
-	public class GraphQLHttpSubscriptionResult : IGraphQLSubscriptionResult {
+	public class GraphQLHttpSubscriptionResult : IGraphQLSubscriptionResult
+	{
 
 		public event Action<GraphQLResponse> OnReceive;
 
@@ -22,12 +24,13 @@ namespace GraphQL.Client.Http {
 
 		private readonly ClientWebSocket clientWebSocket = new ClientWebSocket();
 		private readonly Uri webSocketUri;
-		private readonly GraphQLRequest graphQLRequest;
+		private readonly GraphQLRequest graphQlRequest;
 		private readonly byte[] buffer = new byte[1024 * 1024];
 
-		internal GraphQLHttpSubscriptionResult(Uri webSocketUri, GraphQLRequest graphQLRequest) {
+		internal GraphQLHttpSubscriptionResult(Uri webSocketUri, GraphQLRequest graphQlRequest)
+		{
 			this.webSocketUri = webSocketUri;
-			this.graphQLRequest = graphQLRequest;
+			this.graphQlRequest = graphQlRequest;
 			this.clientWebSocket.Options.AddSubProtocol("graphql-ws");
 		}
 
@@ -36,7 +39,8 @@ namespace GraphQL.Client.Http {
 		/// </summary>
 		public ClientWebSocketOptions Options => this.clientWebSocket.Options;
 
-		public async void StartAsync(CancellationToken cancellationToken = default) {
+		public async void StartAsync(CancellationToken cancellationToken = default)
+		{
 			await this.clientWebSocket.ConnectAsync(this.webSocketUri, cancellationToken).ConfigureAwait(false);
 			if (this.clientWebSocket.State != WebSocketState.Open)
 			{
@@ -45,7 +49,8 @@ namespace GraphQL.Client.Http {
 
 			var arraySegment = new ArraySegment<byte>(this.buffer);
 			await this.SendInitialMessageAsync(cancellationToken).ConfigureAwait(false);
-			while (this.clientWebSocket.State == WebSocketState.Open) {
+			while (this.clientWebSocket.State == WebSocketState.Open)
+			{
 				var webSocketReceiveResult = await this.clientWebSocket.ReceiveAsync(arraySegment, cancellationToken);
 				var stringResult = Encoding.UTF8.GetString(arraySegment.Array, 0, webSocketReceiveResult.Count);
 				var webSocketResponse = JsonConvert.DeserializeObject<GraphQLSubscriptionResponse>(stringResult);
@@ -61,18 +66,21 @@ namespace GraphQL.Client.Http {
 
 		public void Dispose() => this.clientWebSocket.Dispose();
 
-		private async Task SendInitialMessageAsync(CancellationToken cancellationToken = default) {
-			var webSocketRequest = new GraphQLSubscriptionRequest {
+		private async Task SendInitialMessageAsync(CancellationToken cancellationToken = default)
+		{
+			var webSocketRequest = new GraphQLSubscriptionRequest
+			{
 				Id = "1",
 				Type = GQLWebSocketMessageType.GQL_START,
-				Payload = this.graphQLRequest
+				Payload = this.graphQlRequest
 			};
 			var webSocketRequestString = JsonConvert.SerializeObject(webSocketRequest);
 			var arraySegmentWebSocketRequest = new ArraySegment<byte>(Encoding.UTF8.GetBytes(webSocketRequestString));
 			await this.clientWebSocket.SendAsync(arraySegmentWebSocketRequest, WebSocketMessageType.Text, true, cancellationToken).ConfigureAwait(false);
 		}
 
-		private static class GQLWebSocketMessageType {
+		private static class GQLWebSocketMessageType
+		{
 			/// <summary>
 			///     Client sends this message after plain websocket connection to start the communication with the server
 			///     The server will response only with GQL_CONNECTION_ACK + GQL_CONNECTION_KEEP_ALIVE(if used) or GQL_CONNECTION_ERROR
