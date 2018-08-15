@@ -136,7 +136,6 @@ namespace GraphQL.Client.Http {
 				graphQlSubscriptionResult.Options.SetRequestHeader(key, value);
 			}
 
-			//graphQLSubscriptionResult.Options.SetRequestHeader("Authorization", this.DefaultRequestHeaders.Authorization.ToString());
 			graphQlSubscriptionResult.StartAsync(cancellationToken);
 			return await Task.FromResult(graphQlSubscriptionResult).ConfigureAwait(false);
 		}
